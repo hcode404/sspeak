@@ -1,22 +1,18 @@
-'use strict';
-
+// firebase-config.js
 // Firebase configuration
 const firebaseConfig = {
-  apiKey: 'your-api-key',
-  authDomain: 'your-auth-domain',
-  projectId: 'your-project-id',
-  storageBucket: 'your-storage-bucket',
-  messagingSenderId: 'your-messaging-sender-id',
-  appId: 'your-app-id'
+    apiKey: 'YOUR_API_KEY',
+    authDomain: 'YOUR_AUTH_DOMAIN',
+    projectId: 'YOUR_PROJECT_ID',
+    storageBucket: 'YOUR_STORAGE_BUCKET',
+    messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
+    appId: 'YOUR_APP_ID'
 };
 
 // Initialize Firebase
-const app = firebase.initializeApp(firebaseConfig);
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
 
-// Initialize Firestore
 const db = firebase.firestore();
-
-// Initialize Authentication
 const auth = firebase.auth();
-
-module.exports = { db, auth };
