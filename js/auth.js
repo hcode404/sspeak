@@ -1,24 +1,8 @@
-// js/auth.js
-
-import firebase from 'firebase/app';
-import 'firebase/auth';
-
-const firebaseConfig = {
-    apiKey: 'YOUR_API_KEY',
-    authDomain: 'YOUR_AUTH_DOMAIN',
-    projectId: 'YOUR_PROJECT_ID',
-    storageBucket: 'YOUR_STORAGE_BUCKET',
-    messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
-    appId: 'YOUR_APP_ID'
-};
-
-// Initialize Firebase
-if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-}
+// auth.js
+// Authentication functions using Firebase
 
 // Anonymous Sign-In
-export const signInAnonymously = async () => {
+const signInAnonymously = async () => {
     try {
         const userCredential = await firebase.auth().signInAnonymously();
         console.log('Anonymous user signed in:', userCredential.user);
@@ -30,7 +14,7 @@ export const signInAnonymously = async () => {
 };
 
 // Google Sign-In
-export const signInWithGoogle = async () => {
+const signInWithGoogle = async () => {
     const provider = new firebase.auth.GoogleAuthProvider();
     try {
         const userCredential = await firebase.auth().signInWithPopup(provider);
@@ -42,5 +26,13 @@ export const signInWithGoogle = async () => {
     }
 };
 
-// Export Auth Functions
-export default { signInAnonymously, signInWithGoogle };
+// Sign Out
+const signOut = async () => {
+    try {
+        await firebase.auth().signOut();
+        console.log('User signed out');
+    } catch (error) {
+        console.error('Error signing out:', error);
+        throw error;
+    }
+};
