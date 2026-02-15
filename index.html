@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMAI Connect - Discord Style</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <style>
+        body { background: #313338; color: #dbdee1; font-family: sans-serif; }
+        .sidebar { background: #2b2d31; width: 240px; height: 100vh; }
+        .chat-area { flex-grow: 1; background: #313338; display: flex; flex-direction: column; }
+        .user-tag { background: #1e1f22; padding: 10px; position: absolute; bottom: 0; width: 240px; }
+        .video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; padding: 10px; }
+        video { background: #000; border-radius: 8px; width: 100%; transform: scaleX(-1); }
+    </style>
+</head>
+<body class="flex">
+
+    <div class="sidebar flex flex-col border-l border-black/20">
+        <div class="p-4 font-bold shadow-md text-white">SMAI Server</div>
+        <div class="flex-grow p-2 space-y-2">
+            <div class="hover:bg-gray-700 p-2 rounded cursor-pointer">💬 צ'אט כללי</div>
+            <div class="hover:bg-gray-700 p-2 rounded cursor-pointer text-green-400">🔊 חדר קול (Voice)</div>
+        </div>
+        <div class="user-tag border-t border-gray-700" id="user-info">
+            <button id="login-btn" class="bg-indigo-500 text-white px-4 py-1 rounded w-full">התחברות אנונימית</button>
+        </div>
+    </div>
+
+    <div class="chat-area">
+        <div class="p-4 border-b border-black/20 font-bold"># חדר-שידור-SMAI</div>
+        
+        <div id="video-container" class="video-grid flex-grow">
+            <video id="local-video" autoplay playsinline muted></video>
+        </div>
+
+        <div class="p-4 bg-gray-800 flex justify-center gap-4">
+            <button id="toggle-mic" class="p-3 bg-gray-700 rounded-full hover:bg-gray-600">🎤</button>
+            <button id="toggle-cam" class="p-3 bg-gray-700 rounded-full hover:bg-gray-600">📷</button>
+            <button id="call-btn" class="p-3 bg-green-600 rounded-full hover:bg-green-500 text-xs px-6">התחל שידור</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+        // תכניס כאן את הנתונים שלך!
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT.firebaseapp.com",
+            projectId: "YOUR_PROJECT",
+            appId: "YOUR_APP_ID"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        let localStream;
+        let myPeer;
+
+        // התחברות
+        document.getElementById('login-btn').onclick = () => signInAnonymously(auth);
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                document.getElementById('user-info').innerHTML = `<div class="text-xs">מחובר כ:</div><div class="text-white font-bold">${user.uid.slice(0,8)}</div>`;
+                initPeer(user.uid);
+            }
+        });
+
+        // אתחול וידאו וקול
+        async function initCamera() {
+            localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            document.getElementById('local-video').srcObject = localStream;
+        }
+
+        function initPeer(userId) {
+            myPeer = new Peer(userId);
+            
+            myPeer.on('call', call => {
+                call.answer(localStream);
+                call.on('stream', userStream => addVideo(userStream));
+            });
+        }
+
+        function addVideo(stream) {
+            const video = document.createElement('video');
+            video.srcObject = stream;
+            video.autoplay = true;
+            video.playsinline = true;
+            document.getElementById('video-container').append(video);
+        }
+
+        document.getElementById('start-btn')?.addEventListener('click', initCamera);
+        // (המשך הלוגיקה של חיוג לשחקנים אחרים...)
+    </script>
+</body>
+</html>
