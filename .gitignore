@@ -1,0 +1,6 @@
+# Node modules
+node_modules/
+
+# Sensitive files
+.env
+config/secret.json
